@@ -7,7 +7,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'https://equitee.golf',
+      'https://www.equitee.golf'
+    ],
     credentials: true,
   });
 
@@ -29,8 +33,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT || 3001;
-  await app.listen(port);
+  const port = process.env.PORT || 10000;
+  await app.listen(port, '0.0.0.0');
   console.log(`EquiTee API running on port ${port}`);
 }
 
