@@ -510,11 +510,21 @@ Please provide a CONCISE response (3-4 lines max) using this real data. Format c
 
   private async searchCourses(context: AgentContext, args: any = {}) {
     // Use real courses service with AI parameters - handle both nested and flat structures
+    let lat, lng;
+
+    // Handle location as array [lat, lng] from text parsing
+    if (Array.isArray(args.location) && args.location.length === 2) {
+      [lat, lng] = args.location;
+    } else {
+      lat = args.lat || args.location?.lat || context.userLocation.lat;
+      lng = args.lng || args.location?.lng || context.userLocation.lng;
+    }
+
     const searchParams = {
-      lat: args.lat || args.location?.lat || context.userLocation.lat,
-      lng: args.lng || args.location?.lng || context.userLocation.lng,
+      lat,
+      lng,
       radius: args.radius || 25,
-      price: args.budget || context.userProfile?.budget || 100,
+      price: args.maxPrice || args.budget || context.userProfile?.budget || 100,
       youth_programs: args.youthPrograms,
     };
 
