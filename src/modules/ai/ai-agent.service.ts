@@ -64,67 +64,58 @@ export class AIAgentService {
     mapHighlights: MapHighlight[];
     followUpQuestions: string[];
   }> {
-    // Define available tools for the AI
+    // Define available tools for the AI - using simpler parameter structures for compatibility
     const availableTools = [
       {
         name: 'searchCourses',
         description: 'Search for golf courses near user location with budget and preferences',
         parameters: z.object({
-          location: z.object({
-            lat: z.number(),
-            lng: z.number(),
-          }),
-          budget: z.number().optional(),
-          radius: z.number().optional(),
-          youthPrograms: z.boolean().optional(),
+          lat: z.number().describe('Latitude of search location'),
+          lng: z.number().describe('Longitude of search location'),
+          budget: z.number().optional().describe('Maximum budget per round'),
+          radius: z.number().optional().describe('Search radius in miles'),
+          youthPrograms: z.boolean().optional().describe('Filter for youth programs'),
         }),
       },
       {
         name: 'findMentors',
         description: 'Find golf mentors and coaches near user location',
         parameters: z.object({
-          location: z.object({
-            lat: z.number(),
-            lng: z.number(),
-          }),
-          budget: z.number().optional(),
-          radius: z.number().optional(),
-          specialties: z.array(z.string()).optional(),
+          lat: z.number().describe('Latitude of search location'),
+          lng: z.number().describe('Longitude of search location'),
+          budget: z.number().optional().describe('Maximum budget per lesson'),
+          radius: z.number().optional().describe('Search radius in miles'),
+          specialty: z.string().optional().describe('Specific coaching specialty'),
         }),
       },
       {
         name: 'findYouthPrograms',
         description: 'Find youth golf programs near user location',
         parameters: z.object({
-          location: z.object({
-            lat: z.number(),
-            lng: z.number(),
-          }),
-          budget: z.number().optional(),
-          radius: z.number().optional(),
-          ageRange: z.array(z.number()).optional(),
+          lat: z.number().describe('Latitude of search location'),
+          lng: z.number().describe('Longitude of search location'),
+          budget: z.number().optional().describe('Maximum budget per program'),
+          radius: z.number().optional().describe('Search radius in miles'),
+          minAge: z.number().optional().describe('Minimum age for program'),
+          maxAge: z.number().optional().describe('Maximum age for program'),
         }),
       },
       {
         name: 'getAccessibilityScore',
         description: 'Get golf accessibility score for user location',
         parameters: z.object({
-          lat: z.number(),
-          lng: z.number(),
+          lat: z.number().describe('Latitude of location'),
+          lng: z.number().describe('Longitude of location'),
         }),
       },
       {
         name: 'calculateTravelOptions',
-        description: 'Calculate travel options to a destination',
+        description: 'Calculate travel options between two locations',
         parameters: z.object({
-          from: z.object({
-            lat: z.number(),
-            lng: z.number(),
-          }),
-          to: z.object({
-            lat: z.number(),
-            lng: z.number(),
-          }),
+          fromLat: z.number().describe('Starting latitude'),
+          fromLng: z.number().describe('Starting longitude'),
+          toLat: z.number().describe('Destination latitude'),
+          toLng: z.number().describe('Destination longitude'),
         }),
       },
     ];
@@ -299,7 +290,7 @@ Please provide a CONCISE response (3-4 lines max) using this real data. Format c
         return { data: accessibility };
 
       case 'calculateTravelOptions':
-        const travel = await this.calculateTravelOptions(context, args.to);
+        const travel = await this.calculateTravelOptions(context, args);
         return { data: travel };
 
       default:
@@ -518,10 +509,10 @@ Please provide a CONCISE response (3-4 lines max) using this real data. Format c
   }
 
   private async searchCourses(context: AgentContext, args: any = {}) {
-    // Use real courses service with AI parameters
+    // Use real courses service with AI parameters - handle both nested and flat structures
     const searchParams = {
-      lat: args.location?.lat || context.userLocation.lat,
-      lng: args.location?.lng || context.userLocation.lng,
+      lat: args.lat || args.location?.lat || context.userLocation.lat,
+      lng: args.lng || args.location?.lng || context.userLocation.lng,
       radius: args.radius || 25,
       price: args.budget || context.userProfile?.budget || 100,
       youth_programs: args.youthPrograms,
@@ -542,11 +533,17 @@ Please provide a CONCISE response (3-4 lines max) using this real data. Format c
   }
 
   private async findMentors(context: AgentContext, args: any = {}) {
+    // Handle both nested and flat parameter structures
+    const location = {
+      lat: args.lat || args.location?.lat || context.userLocation.lat,
+      lng: args.lng || args.location?.lng || context.userLocation.lng,
+    };
+
     return await this.mentorsService.findNearbyMentors({
-      location: args.location || context.userLocation,
+      location,
       budget: args.budget || context.userProfile?.budget || 200,
       radius: args.radius || 30,
-      specialties: args.specialties,
+      specialties: args.specialty ? [args.specialty] : args.specialties,
     });
   }
 
@@ -568,11 +565,19 @@ Please provide a CONCISE response (3-4 lines max) using this real data. Format c
   }
 
   private async findYouthPrograms(context: AgentContext, args: any = {}) {
+    // Handle both nested and flat parameter structures
+    const location = {
+      lat: args.lat || args.location?.lat || context.userLocation.lat,
+      lng: args.lng || args.location?.lng || context.userLocation.lng,
+    };
+
+    const ageRange = (args.minAge && args.maxAge) ? [args.minAge, args.maxAge] : args.ageRange;
+
     return await this.youthProgramsService.findNearbyPrograms({
-      location: args.location || context.userLocation,
+      location,
       budget: args.budget || context.userProfile?.budget || 100,
       radius: args.radius || 25,
-      ageRange: args.ageRange,
+      ageRange,
     });
   }
 
@@ -583,10 +588,20 @@ Please provide a CONCISE response (3-4 lines max) using this real data. Format c
     );
   }
 
-  private async calculateTravelOptions(context: AgentContext, destination: any) {
+  private async calculateTravelOptions(context: AgentContext, args: any = {}) {
+    // Handle both nested and flat parameter structures
+    const from = {
+      lat: args.fromLat || args.from?.lat || context.userLocation.lat,
+      lng: args.fromLng || args.from?.lng || context.userLocation.lng,
+    };
+    const to = {
+      lat: args.toLat || args.to?.lat || args.destination?.lat,
+      lng: args.toLng || args.to?.lng || args.destination?.lng,
+    };
+
     return await this.communityToolsService.calculateTravelOptions({
-      from: context.userLocation,
-      to: { lat: destination.lat || context.userLocation.lat, lng: destination.lng || context.userLocation.lng },
+      from,
+      to,
       transportModes: ['driving', 'transit', 'walking', 'biking'],
     });
   }

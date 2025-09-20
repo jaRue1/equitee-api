@@ -69,16 +69,12 @@ export class AIService {
 
       const { generateText } = await import('ai');
 
-      // Convert tools to proper SDK format
+      // Convert tools to proper SDK format for Anthropic
       const toolsObject: Record<string, any> = {};
       availableTools.forEach(tool => {
         toolsObject[tool.name] = {
           description: tool.description,
-          parameters: {
-            type: 'object',
-            properties: this.convertZodToJsonSchema(tool.parameters),
-            required: this.getRequiredFields(tool.parameters),
-          },
+          parameters: tool.parameters, // Pass Zod schema directly - the SDK handles it
         };
       });
 
