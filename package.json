@@ -21,6 +21,8 @@
     "seed:courses": "ts-node database/seeds/seed-courses.ts"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.17",
+    "@ai-sdk/openai": "^2.0.32",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.0.0",
@@ -30,14 +32,19 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.0.0",
     "@nestjs/throttler": "^6.4.0",
-    "@supabase/supabase-js": "^2.0.0",
+    "@supabase/supabase-js": "^2.57.4",
+    "ai": "^5.0.47",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "dotenv": "^16.0.0",
+    "node-fetch": "^3.3.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
+    "puppeteer": "^24.22.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "uuid": "^13.0.0",
+    "zod": "^4.1.9"
   },
   "devDependencies": {
     "@nestjs/schematics": "^10.0.0",
@@ -47,6 +54,7 @@
     "@types/node": "^20.3.1",
     "@types/passport-jwt": "^4.0.0",
     "@types/supertest": "^2.0.12",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.42.0",

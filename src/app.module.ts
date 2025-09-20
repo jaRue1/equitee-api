@@ -10,6 +10,12 @@ import { CoursesModule } from './modules/courses/courses.module';
 import { EquipmentModule } from './modules/equipment/equipment.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MapModule } from './modules/map/map.module';
+import { DemographicsModule } from './modules/demographics/demographics.module';
+import { MentorsModule } from './modules/mentors/mentors.module';
+import { YouthProgramsModule } from './modules/youth-programs/youth-programs.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { AIModule } from './modules/ai/ai.module';
+import { CommunityModule } from './modules/community/community.module';
 
 @Module({
   imports: [
@@ -28,6 +34,12 @@ import { MapModule } from './modules/map/map.module';
     EquipmentModule,
     AuthModule,
     MapModule,
+    DemographicsModule,
+    MentorsModule,
+    YouthProgramsModule,
+    ChatModule,
+    AIModule,
+    CommunityModule,
   ],
   controllers: [AppController],
   providers: [
